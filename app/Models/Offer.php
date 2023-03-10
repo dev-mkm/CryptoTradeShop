@@ -14,13 +14,19 @@ class Offer extends Model
         'price',
         'amount',
         'selling',
+        'user_id',
+    ];
+
+    protected $hidden = [
+        'user_id',
+        'crypto_id'
     ];
 
     public function crypto(): BelongsTo {
-        return $this->belongsTo(Crypto::class, 'crypto');
+        return $this->belongsTo(Crypto::class);
     }
 
     public function user(): BelongsTo {
-        return $this->belongsTo(User::class, 'user');
+        return $this->belongsTo(User::class);
     }
 }

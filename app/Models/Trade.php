@@ -17,8 +17,12 @@ class Trade extends Model
         'cryptovalue',
     ];
 
+    protected $hidden = [
+        'crypto_id',
+    ];
+
     public function crypto(): BelongsTo {
-        return $this->belongsTo(Crypto::class, 'crypto');
+        return $this->belongsTo(Crypto::class);
     }
 
     public function users(): BelongsToMany {

@@ -19,8 +19,8 @@ class OfferFactory extends Factory
     public function definition(): array
     {
         return [
-            'user' => User::factory(),
-            'crypto' => Crypto::factory(),
+            'user_id' => User::factory(),
+            'crypto_id' => Crypto::factory(),
             'price' => fake()->randomNumber(),
             'amount' => fake()->randomNumber(),
             'selling' => fake()->boolean(),

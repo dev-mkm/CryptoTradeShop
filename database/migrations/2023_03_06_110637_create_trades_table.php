@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('offers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('crypto')->constrained('cryptos')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
             $table->unsignedBigInteger('price');
             $table->unsignedBigInteger('amount');
             $table->boolean('selling');
@@ -22,7 +22,7 @@ return new class extends Migration
         });
         Schema::create('trades', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('crypto')->constrained('cryptos')->cascadeOnDelete();
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
             $table->unsignedBigInteger('price');
             $table->unsignedBigInteger('amount');
             $table->decimal('cryptovalue', 8, 2, true);

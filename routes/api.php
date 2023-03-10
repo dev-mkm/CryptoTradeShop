@@ -21,7 +21,7 @@ Route::apiResource('cryptos', CryptoController::class)->scoped(['crypto' => 'slu
 Route::apiResource('cryptos.offers', OfferController::class)->scoped(['crypto' => 'slug']);
 Route::apiResource('trades', TradeController::class)->only([
     'index', 'show'
-]);
+])->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

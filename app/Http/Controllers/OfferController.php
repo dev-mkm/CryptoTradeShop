@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Crypto;
 use App\Models\Offer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class OfferController extends Controller
 {
@@ -21,7 +22,50 @@ class OfferController extends Controller
      */
     public function store(Request $request, Crypto $crypto)
     {
-        //
+        $this->authorize('create', Offer::class);
+        $validateRequest = Validator::make($request->all(), [
+            'price' => "required|integer|min_digits:4|max_digits:6",
+            'amount' => "required|integer|min:1|max_digits:5",
+            'selling' => "required|boolean"
+        ]);
+        if($validateRequest->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid Request',
+                'errors' => $validateRequest->errors()
+            ], 400);
+        }
+        $user = $request->user();
+        $hasOffer = Offer::whereBelongsTo($user)->whereBelongsTo($crypto)->exists();
+        if($hasOffer) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Offer for this currency already exists'
+            ], 400);
+        }
+        $selling = $request->input('selling');
+        $price = $request->input('price');
+        $possibleTrade = Offer::whereBelongsTo($crypto)->where('selling', !$selling);
+        switch ($selling) {
+            case true:
+                $possibleTrade = $possibleTrade->where('price', '>=', $price);
+                break;
+            
+            case false:
+                $possibleTrade = $possibleTrade->where('price', '<=', $price);
+                break;
+        }
+        if($possibleTrade->count() > 0) {
+            //add Trades
+        } else {
+            //add money change
+            $crypto->offers()->create([
+                'price' => $price,
+                'amount' => $request->input('amount'),
+                'selling' => $selling,
+                'user_id' => $user->id,
+            ]);
+        }
     }
 
     /**
@@ -37,7 +81,38 @@ class OfferController extends Controller
      */
     public function update(Request $request, Crypto $crypto, Offer $offer)
     {
-        //
+        $this->authorize('update', $offer);
+        $validateRequest = Validator::make($request->all(), [
+            'price' => "required|integer|min_digits:4|max_digits:6",
+            'amount' => "required|min:1|max_digits:5",
+        ]);
+        if($validateRequest->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid Request',
+                'errors' => $validateRequest->errors()
+            ], 400);
+        }
+        $selling = $offer->selling;
+        $price = $request->input('price');
+        $possibleTrade = Offer::whereBelongsTo($crypto)->where('selling', !$selling);
+        switch ($selling) {
+            case true:
+                $possibleTrade = $possibleTrade->where('price', '>=', $price);
+                break;
+            
+            case false:
+                $possibleTrade = $possibleTrade->where('price', '<=', $price);
+                break;
+        }
+        if($possibleTrade->count() > 0) {
+
+        } else {
+            $offer->updateOrFail([
+                'price' => $price,
+                'amount' => $request->input('amount')
+            ]);
+        }
     }
 
     /**
@@ -45,6 +120,11 @@ class OfferController extends Controller
      */
     public function destroy(Crypto $crypto, Offer $offer)
     {
-        //
+        $this->authorize('delete', $offer);
+        $offer->deleteOrFail();
+        return response()->json([
+            'status' => true,
+            'message' => "Delete Successful",
+        ]);
     }
 }

@@ -23,6 +23,6 @@ class Crypto extends Model
     ];
 
     public function offers(): HasMany {
-        return $this->hasMany(Offer::class, 'crypto');
+        return $this->hasMany(Offer::class);
     }
 }
