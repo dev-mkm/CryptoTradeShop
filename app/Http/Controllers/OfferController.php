@@ -48,20 +48,42 @@ class OfferController extends Controller
         $possibleTrade = Offer::whereBelongsTo($crypto)->where('selling', !$selling);
         switch ($selling) {
             case true:
-                $possibleTrade = $possibleTrade->where('price', '>=', $price);
+                $possibleTrade = $possibleTrade->where('price', '>=', $price)->orderBy('price', 'desc');
                 break;
-            
+
             case false:
-                $possibleTrade = $possibleTrade->where('price', '<=', $price);
+                $possibleTrade = $possibleTrade->where('price', '<=', $price)->orderBy('price', 'asc');
                 break;
         }
-        if($possibleTrade->count() > 0) {
-            //add Trades
-        } else {
+        $amount = $request->input('amount');
+        foreach ($possibleTrade->cursor() as $trade) {
+            if ($amount == 0) {
+                break;
+            }
+            $tradeamount = 0;
+            if ($trade->amount >= $amount) {
+                $tradeamount = $amount;
+                $trade->amount -= $tradeamount;
+                $amount = 0;
+                $trade->amount == 0 ? $trade->delete() : $trade->save();
+            } else {
+                $tradeamount = $trade->amount;
+                $amount -= $tradeamount;
+                $trade->delete();
+            }
+            if ($selling) {
+                $user->balance += $tradeamount * $price;
+                //add Change in CryptoBakance
+            } else {
+                $trade->user->balance += $tradeamount * $price;
+                //add Change in CryptoBakance
+            }
+        }
+        if ($amount > 0) {
             //add money change
             $crypto->offers()->create([
                 'price' => $price,
-                'amount' => $request->input('amount'),
+                'amount' => $amount,
                 'selling' => $selling,
                 'user_id' => $user->id,
             ]);
@@ -100,7 +122,7 @@ class OfferController extends Controller
             case true:
                 $possibleTrade = $possibleTrade->where('price', '>=', $price);
                 break;
-            
+
             case false:
                 $possibleTrade = $possibleTrade->where('price', '<=', $price);
                 break;
