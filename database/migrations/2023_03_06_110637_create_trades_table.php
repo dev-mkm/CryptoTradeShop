@@ -32,6 +32,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('trade_id')->constrained('trades')->cascadeOnDelete();
             $table->enum('role', ['Buyer', 'Seller']);
+            $table->primary(['user_id', 'trade_id']);
         });
     }
 

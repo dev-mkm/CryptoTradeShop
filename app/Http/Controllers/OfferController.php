@@ -4,11 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Crypto;
 use App\Models\Offer;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class OfferController extends Controller
 {
+    private function updateCryptoBalance(User $user, Crypto $crypto, $amount) {
+        $currency = $user->cryptos()->where('id', $crypto->id)->first();
+        if($currency == null) {
+            $user->cryptos()->attach($crypto->id);
+            $currency = 0;
+        } else {
+            $currency = $currency->balance;
+        }
+        $user->cryptos()->updateExistingPivot($crypto->id, ['balance' => $currency + $amount]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -73,10 +85,10 @@ class OfferController extends Controller
             }
             if ($selling) {
                 $user->balance += $tradeamount * $price;
-                //add Change in CryptoBakance
+                $this->updateCryptoBalance($trade->user, $crypto, $amount);
             } else {
                 $trade->user->balance += $tradeamount * $price;
-                //add Change in CryptoBakance
+                $this->updateCryptoBalance($user, $crypto, $amount);
             }
         }
         if ($amount > 0) {
@@ -95,7 +107,7 @@ class OfferController extends Controller
      */
     public function show(Crypto $crypto, Offer $offer)
     {
-        return Offer::with(['crypto', 'user'])->find($offer['id'])->toArray();
+        return Offer::with(['crypto', 'user'])->find($offer->id)->toArray();
     }
 
     /**

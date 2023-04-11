@@ -22,7 +22,8 @@ return new class extends Migration
         Schema::create('cryptoBalance', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
-            $table->unsignedBigInteger('balance');
+            $table->unsignedBigInteger('balance')->default(0);
+            $table->primary(['user_id', 'crypto_id']);
         });
     }
 
