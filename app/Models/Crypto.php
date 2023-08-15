@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Crypto extends Model
 {
@@ -14,7 +15,6 @@ class Crypto extends Model
         'slug',
         'name',
         'logo',
-        'price',
     ];
 
     protected $hidden = [
@@ -24,5 +24,13 @@ class Crypto extends Model
 
     public function offers(): HasMany {
         return $this->hasMany(Offer::class);
+    }
+
+    public function priceHistory(): HasMany {
+        return $this->hasMany(CryptoPrice::class);
+    }
+
+    public function price() {
+        return $this->priceHistory()->one()->ofMany('date', 'max')->first()->price;
     }
 }

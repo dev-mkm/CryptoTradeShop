@@ -20,7 +20,6 @@ class CryptoFactory extends Factory
             'slug' => fake()->unique()->slug(),
             'name' => fake()->unique()->name(),
             'logo' => fake()->imageUrl(),
-            'price' => fake()->randomNumber(),
         ];
     }
 }

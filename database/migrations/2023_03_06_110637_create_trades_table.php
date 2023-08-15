@@ -24,15 +24,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
             $table->unsignedBigInteger('price');
-            $table->unsignedBigInteger('amount');
-            $table->decimal('cryptovalue', 8, 2, true);
+            $table->decimal('amount', 27, 18, true);
+            $table->decimal('cryptovalue', 10, 2, true);
             $table->timestamps();
         });
         Schema::create('userTrades', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('trade_id')->constrained('trades')->cascadeOnDelete();
             $table->enum('role', ['Buyer', 'Seller']);
-            $table->primary(['user_id', 'trade_id']);
+            $table->primary(['role', 'trade_id']);
         });
     }
 

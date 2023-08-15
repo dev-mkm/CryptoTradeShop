@@ -3,23 +3,19 @@
 namespace Database\Seeders;
 
 use App\Models\Crypto;
-use App\Models\User;
+use App\Models\CryptoPrice;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class UserSeeder extends Seeder
+class CryptoPriceSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        User::factory()
-            ->hasAttached(Crypto::factory()
-                ->count(3)
-                ->create(), 
-                ['balance' => fake()->randomNumber()])
-            ->count(5)
+        CryptoPrice::factory()
+            ->count(10)
             ->create();
     }
 }

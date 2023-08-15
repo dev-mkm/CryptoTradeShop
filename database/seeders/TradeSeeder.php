@@ -16,11 +16,15 @@ class TradeSeeder extends Seeder
     public function run(): void
     {
         Trade::factory()
-            ->count(50)
+            ->count(10)
             ->hasAttached(User::factory()
-                ->count(2)
+                ->count(1)
                 ->create(), 
-                ['role' => fake()->randomElement(['Buyer', 'Seller'])])
+                ['role' => 'Buyer'])
+            ->hasAttached(User::factory()
+                ->count(1)
+                ->create(), 
+                ['role' => 'Seller'])
             ->create();
     }
 }
