@@ -22,7 +22,7 @@ class PhotoCryptoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'photo' => "required|image|mimes:jpg,png,jpeg,gif,svg",
         ];
     }
 }

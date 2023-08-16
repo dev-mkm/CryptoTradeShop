@@ -29,7 +29,7 @@ class PriceController extends Controller
                     $sort = "YEAR(price.time) as `year`, AVG(price.price) as `price`";
                     $group = 'GROUP BY `year` ORDER BY `year` DESC';
                     break;
-                
+
                 case 'month':
                     $sort = "YEAR(price.time) as `year`, MONTH(price.time) as `month`, AVG(price.price) as `price`";
                     $group = 'GROUP BY `month` ORDER BY `year`, `month` DESC';
@@ -39,7 +39,7 @@ class PriceController extends Controller
                     $sort = "YEAR(price.time) as `year`, WEEK(price.time) as `week`, AVG(price.price) as `price`";
                     $group = 'GROUP BY `week` ORDER BY `year`, `week` DESC';;
                     break;
-                
+
                 case 'day':
                     $sort = "YEAR(price.time) as `year`, MONTH(price.time) as `month`, DAY(price.time) as `day`, AVG(price.price) as `price`";
                     $group = 'GROUP BY `day` ORDER BY `year`, `month`, `day` DESC';
@@ -67,7 +67,25 @@ class PriceController extends Controller
      */
     public function store(StoreCryptoPriceRequest $request, string $crypto)
     {
-        //
+        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = '?'", [
+            $crypto,
+        ]);
+        abort_unless($cryptos > 0, 404, 'Crypto not found');
+        return response()->json([
+            'status' => 200,
+            'result' => $cryptos[0]
+        ]);
+        $validated = $request->validated();
+
+        $insert = DB::insert("INSERT into `crypto_prices` (`time`, `price`, `crypto_id`) values ('?', '?', '?')", [
+            now(),
+            $validated['price'],
+            $cryptos[0]['id'],
+        ]);
+        abort_unless($insert, 500, 'Server Error');
+        return response()->json([
+            'status' => 200
+        ]);
     }
 
     /**
@@ -85,9 +103,10 @@ class PriceController extends Controller
             $crypto,
             $cryptoPrice
         ]);
+        abort_unless($cryptos > 0, 404, 'Price not found');
         return response()->json([
             'status' => 200,
-            'result' => $cryptos
+            'result' => $cryptos[0]
         ]);
     }
 }

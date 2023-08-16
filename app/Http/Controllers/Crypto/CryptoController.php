@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Crypto;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PhotoCryptoRequest;
-use App\Models\Crypto;
 use App\Http\Requests\StoreCryptoRequest;
 use App\Http\Requests\UpdateCryptoRequest;
 use Illuminate\Http\Request;
@@ -39,17 +38,18 @@ class CryptoController extends Controller
     {
         $validated = $request->safe()->except(['photo']);
         $file = $request->file('photo');
-        
+
         $photo = $file->storePubliclyAs(
             'public/crypto', $validated['slug'].'.'.$file->extension()
         );
-        $insert = DB::insert("INSERT into cryptos (`slug`, `name`. `logo`) values ('?', '?', '?')", [
+        $insert = DB::insert("INSERT into cryptos (`slug`, `name`, `logo`) values ('?', '?', '?')", [
             $validated['slug'],
             $validated['name'],
             $photo,
         ]);
+        abort_unless($insert, 500, 'Server Error');
         return response()->json([
-            'status' => $insert ? 200 : 500
+            'status' => 200
         ]);
     }
 

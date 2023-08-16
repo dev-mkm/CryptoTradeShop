@@ -2,13 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Crypto;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Trade>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CryptoTransaction>
  */
-class TradeFactory extends Factory
+class CryptoTransactionFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,9 +17,7 @@ class TradeFactory extends Factory
     public function definition(): array
     {
         return [
-            'crypto_id' => Crypto::factory(),
-            'price' => fake()->randomNumber(),
-            'amount' => fake()->randomNumber(),
+            //
         ];
     }
 }

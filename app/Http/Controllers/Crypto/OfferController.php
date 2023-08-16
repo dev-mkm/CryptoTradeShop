@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Crypto;
 
 use App\Http\Controllers\Controller;
-use App\Models\Offer;
 use App\Http\Requests\StoreOfferRequest;
 use App\Http\Requests\UpdateOfferRequest;
 use Illuminate\Http\Request;
@@ -70,7 +69,7 @@ class OfferController extends Controller
         WHERE offer.id = ?", [
             $offer,
         ]);
-        abort_unless($cryptos > 0, 404, 'Crypto not found');
+        abort_unless($cryptos > 0, 404, 'Offer not found');
         return response()->json([
             'status' => 200,
             'result' => $cryptos[0]

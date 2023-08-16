@@ -19,15 +19,15 @@ return new class extends Migration
             $table->timestamps();
         });
         Schema::create('cryptoBalance', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
-            $table->timestamp('date');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
+            $table->foreignId('c_t_id')->constrained('crypto_transactions')->cascadeOnUpdate();
             $table->decimal('balance', 27, 18, true)->default(0);
-            $table->primary(['user_id', 'crypto_id', 'date']);
+            $table->primary(['user_id', 'crypto_id', 'c_t_id']);
         });
         Schema::create('crypto_prices', function (Blueprint $table) {
-            $table->timestamp('time');
-            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
+            $table->timestamp('time')->default('CURRENT_TIMESTAMP');
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
             $table->decimal('price', 10, 2, true);
             $table->primary(['time', 'crypto_id']);
         });

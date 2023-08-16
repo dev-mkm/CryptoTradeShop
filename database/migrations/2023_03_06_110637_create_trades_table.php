@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('offers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
             $table->unsignedBigInteger('price');
             $table->unsignedBigInteger('amount');
             $table->boolean('selling');
@@ -22,15 +22,14 @@ return new class extends Migration
         });
         Schema::create('trades', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnDelete();
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
             $table->unsignedBigInteger('price');
             $table->decimal('amount', 27, 18, true);
-            $table->decimal('cryptovalue', 10, 2, true);
             $table->timestamps();
         });
         Schema::create('userTrades', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('trade_id')->constrained('trades')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
+            $table->foreignId('trade_id')->constrained('trades')->cascadeOnUpdate();
             $table->enum('role', ['Buyer', 'Seller']);
             $table->primary(['role', 'trade_id']);
         });

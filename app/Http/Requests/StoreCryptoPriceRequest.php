@@ -22,7 +22,7 @@ class StoreCryptoPriceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'price' => "required|regex:/^\d+(\.\d{1,2})?$/"
         ];
     }
 }

@@ -25,7 +25,7 @@ class StoreCryptoRequest extends FormRequest
             'slug' => "required|string",
             'name' => "required|string",
             'price' => "required|integer",
-            'logo' => "required|image|mimes:jpg,png,jpeg,gif,svg",
+            'photo' => "required|image|mimes:jpg,png,jpeg,gif,svg",
         ];
     }
 }
