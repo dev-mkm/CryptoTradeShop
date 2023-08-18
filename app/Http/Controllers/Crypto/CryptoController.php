@@ -22,9 +22,22 @@ class CryptoController extends Controller
      */
     public function index(Request $request)
     {
-        $cryptos = DB::select('SELECT `slug`,`name`,`logo` from cryptos limit 8 offset ?', [
-            $request->input('page', 0) * 8,
-        ]);
+        $cryptos = DB::select('SELECT cryptos.slug,cryptos.name,cryptos.logo,crypto_prices.price, o.offer from cryptos
+        left join (
+            SELECT crypto_id, MAX(`time`) as MaxTime
+            FROM crypto_prices
+            GROUP BY crypto_id
+        ) r
+        on r.crypto_id = cryptos.id
+        left join crypto_prices
+        ON crypto_prices.crypto_id = cryptos.id AND r.MaxTime = crypto_prices.time
+        left join (
+            SELECT crypto_id, MIN(`price`) as `offer`
+            FROM offers
+            Where `selling` = True
+            GROUP BY crypto_id
+        ) o
+        ON o.crypto_id = cryptos.id');
         return response()->json([
             'status' => 200,
             'result' => $cryptos
@@ -42,7 +55,7 @@ class CryptoController extends Controller
         $photo = $file->storePubliclyAs(
             'public/crypto', $validated['slug'].'.'.$file->extension()
         );
-        $insert = DB::insert("INSERT into cryptos (`slug`, `name`, `logo`) values ('?', '?', '?')", [
+        $insert = DB::insert("INSERT into cryptos (`slug`, `name`, `logo`) values (?, ?, ?)", [
             $validated['slug'],
             $validated['name'],
             $photo,
@@ -58,8 +71,23 @@ class CryptoController extends Controller
      */
     public function show(string $crypto)
     {
-        $cryptos = DB::select("SELECT `slug`,`name`,`logo` from cryptos where slug = '?'", [
-            $crypto,
+        $cryptos = DB::select("SELECT cryptos.slug,cryptos.name,cryptos.logo,crypto_prices.price, o.offer from cryptos
+        left join (
+            SELECT crypto_id, MAX(`time`) as MaxTime
+            FROM crypto_prices
+            GROUP BY crypto_id
+        ) r
+        on r.crypto_id = cryptos.id
+        left join crypto_prices
+        ON crypto_prices.crypto_id = cryptos.id AND r.MaxTime = crypto_prices.time
+        left join (
+            SELECT crypto_id, MIN(`price`) as `offer`
+            FROM offers
+            Where `selling` = True
+            GROUP BY crypto_id
+        ) o
+        ON o.crypto_id = cryptos.id where `slug` = ?", [
+            $crypto
         ]);
         abort_unless($cryptos > 0, 404, 'Crypto not found');
         return response()->json([
@@ -78,7 +106,7 @@ class CryptoController extends Controller
         foreach ($validated as $key => $value) {
             $updates[] = "`$key` = '$value'";
         }
-        $insert = DB::update("UPDATE cryptos set ".implode(',', $updates)." where slug = '?'", [
+        $insert = DB::update("UPDATE cryptos set ".implode(',', $updates)." where slug = ?", [
             $crypto,
         ]);
         abort_unless($insert > 0, 404, 'Crypto not found');
@@ -93,7 +121,7 @@ class CryptoController extends Controller
      */
     public function destroy(string $crypto)
     {
-        $insert = DB::delete("DELETE from cryptos where slug = '?'", [
+        $insert = DB::delete("DELETE from cryptos where slug = ?", [
             $crypto,
         ]);
         abort_unless($insert > 0, 404, 'Crypto not found');
@@ -108,7 +136,7 @@ class CryptoController extends Controller
      */
     public function photo(PhotoCryptoRequest $request, string $crypto)
     {
-        $cryptos = DB::select("SELECT `slug`,`name`,`logo` from cryptos where slug = '?'", [
+        $cryptos = DB::select("SELECT `slug`,`name`,`logo` from cryptos where slug = ?", [
             $crypto,
         ]);
         abort_unless($cryptos > 0, 404, 'Crypto not found');
@@ -118,7 +146,7 @@ class CryptoController extends Controller
         $photo = $file->storePubliclyAs(
             'public/crypto', $cr['slug'].'.'.$file->extension()
         );
-        $insert = DB::update("UPDATE cryptos set `logo` = '?' where slug = '?'", [
+        $insert = DB::update("UPDATE cryptos set `logo` = ? where slug = ?", [
             $photo,
             $crypto,
         ]);

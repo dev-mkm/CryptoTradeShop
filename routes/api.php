@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\CryptoController;
-use App\Http\Controllers\OfferController;
-use App\Http\Controllers\TradeController;
+use App\Http\Controllers\Crypto\CryptoController;
+use App\Http\Controllers\Crypto\OfferController;
+use App\Http\Controllers\Crypto\PriceController;
+use App\Http\Controllers\Crypto\TradeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,8 +18,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::apiResource('cryptos', CryptoController::class)->scoped(['crypto' => 'slug']);
-Route::apiResource('cryptos.offers', OfferController::class)->scoped(['crypto' => 'slug']);
+Route::apiResource('cryptos', CryptoController::class);
+Route::apiResource('cryptos.offers', OfferController::class);
+Route::apiResource('cryptos.prices', PriceController::class);
 Route::apiResource('trades', TradeController::class)->only([
     'index', 'show'
 ])->middleware('auth:sanctum');

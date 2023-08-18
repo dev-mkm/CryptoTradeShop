@@ -32,20 +32,4 @@ class CTransactionController extends Controller
     {
         //
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCryptoTransactionRequest $request, CryptoTransaction $cryptoTransaction)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(CryptoTransaction $cryptoTransaction)
-    {
-        //
-    }
 }

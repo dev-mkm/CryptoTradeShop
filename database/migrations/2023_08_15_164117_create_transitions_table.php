@@ -16,19 +16,26 @@ return new class extends Migration
             $table->string('pay_token');
             $table->unsignedBigInteger('amount');
             $table->enum('state', [
-
-            ]);
+                'waiting',
+                'failed',
+                'success'
+            ])->default('waiting');
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
-            $table->timestamp('date')->default('CURRENT_TIMESTAMP');
+            $table->timestamp('date')->useCurrent();
         });
         Schema::create('crypto_transactions', function (Blueprint $table) {
             $table->id();
             $table->boolean('in_out');
             $table->decimal('amount', 27, 18, true);
             $table->string('ct_token');
+            $table->enum('state', [
+                'waiting',
+                'failed',
+                'success'
+            ])->default('waiting');
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
             $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
-            $table->timestamp('date')->default('CURRENT_TIMESTAMP');
+            $table->timestamp('date')->useCurrent();
         });
     }
 

@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('price');
             $table->unsignedBigInteger('amount');
             $table->boolean('selling');
+            $table->unique(['user_id', 'crypto_id']);
             $table->timestamps();
         });
         Schema::create('trades', function (Blueprint $table) {

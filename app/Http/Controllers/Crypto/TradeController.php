@@ -32,9 +32,8 @@ class TradeController extends Controller
         ON userTrade2.trade_id = trade.id
         LEFT JOIN cryptos
         ON trade.crypto_id = cryptos.id
-        WHERE userTrade1.role = \'Buyer\' AND userTrade2.role = \'Seller\' ?
+        WHERE userTrade1.role = \'Buyer\' AND userTrade2.role = \'Seller\' '.$where.'
         limit 10 offset ?', [
-            $where,
             $request->input('page', 0) * 10,
         ]);
         return response()->json([

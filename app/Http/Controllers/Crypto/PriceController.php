@@ -50,7 +50,7 @@ class PriceController extends Controller
         FROM `crypto_prices` as price
         LEFT JOIN cryptos
         ON price.crypto_id = cryptos.id
-        WHERE cryptos.slug = '?'
+        WHERE cryptos.slug = ?
         $group
         limit 10 offset ?", [
             $crypto,
@@ -67,17 +67,13 @@ class PriceController extends Controller
      */
     public function store(StoreCryptoPriceRequest $request, string $crypto)
     {
-        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = '?'", [
+        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = ?", [
             $crypto,
         ]);
-        abort_unless($cryptos > 0, 404, 'Crypto not found');
-        return response()->json([
-            'status' => 200,
-            'result' => $cryptos[0]
-        ]);
+        abort_unless(count($cryptos) > 0, 404, 'Crypto not found');
         $validated = $request->validated();
 
-        $insert = DB::insert("INSERT into `crypto_prices` (`time`, `price`, `crypto_id`) values ('?', '?', '?')", [
+        $insert = DB::insert("INSERT into `crypto_prices` (`time`, `price`, `crypto_id`) values (?, ?, ?)", [
             now(),
             $validated['price'],
             $cryptos[0]['id'],
@@ -98,7 +94,7 @@ class PriceController extends Controller
         FROM `crypto_prices` as price
         LEFT JOIN cryptos
         ON offer.crypto_id = cryptos.id
-        WHERE cryptos.slug = '?' AND price.time = '?'
+        WHERE cryptos.slug = ? AND price.time = ?
         limit 8 offset ?", [
             $crypto,
             $cryptoPrice

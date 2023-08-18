@@ -22,8 +22,8 @@ class UpdateOfferRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'price' => "nullable|integer|min_digits:4|max_digits:7",
-            'amount' => "nullable|min:1|max_digits:5",
+            'price' => "required|integer|min_digits:4|max_digits:7",
+            'amount' => "required|min:1|max_digits:5",
         ];
     }
 }

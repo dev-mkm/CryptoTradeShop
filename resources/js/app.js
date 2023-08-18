@@ -2,15 +2,17 @@ import './bootstrap';
 import {createApp} from 'vue/dist/vue.esm-bundler.js';
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
-import Home from './pages/Home.vue'
+import Cryptos from './pages/Cryptos.vue'
 import Dashboard from './pages/Dashboard.vue'
+import Crypto from './pages/Crypto.vue'
 
 const app = createApp(App);
 
 //Router
 const routes = [
-    { path: '/', component: Home },
-    { path: '/about', component: Dashboard },
+    { path: '/', component: Dashboard },
+    { path: '/cryptos/:id', component: Crypto },
+    { path: '/cryptos', component: Cryptos },
 ]
 
 //Router
