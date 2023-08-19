@@ -14,13 +14,9 @@ class TradeController extends Controller
      */
     public function index(Request $request)
     {
-        $where = "";
+        $where = "AND offer.user_id = '".$request->user()->id."'";
         if ($request->has('crypto')) {
-            $where = "AND cryptos.slug = '".$request->input('crypto')."'";
-        } elseif ($request->has('user')) {
-            $where = "AND offer.user_id = '".$request->input('user')."'";
-        } else {
-
+            $where .= " AND cryptos.slug = '".$request->input('crypto')."'";
         }
         $cryptos = DB::select('SELECT trade.id ,trade.price,
         cryptos.name as crypto_name , cryptos.slug as crypto_id,
@@ -45,7 +41,7 @@ class TradeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $trade)
+    public function show(Request $request,string $trade)
     {
         $cryptos = DB::select("SELECT trade.id ,trade.price,
         cryptos.name as crypto_name , cryptos.slug as crypto_id,
@@ -61,6 +57,7 @@ class TradeController extends Controller
             $trade,
         ]);
         abort_unless($cryptos > 0, 404, 'Trade not found');
+        abort_unless($request->user()->id == $cryptos[0]['seller_id'] || $request->user()->id == $cryptos[0]['buyer_id'] || $request->user()->is_admin(), 403, 'Access denied');
         return response()->json([
             'status' => 200,
             'result' => $cryptos[0]

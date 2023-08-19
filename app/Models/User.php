@@ -45,6 +45,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function is_admin() : bool {
+        return $this->admin;
+    }
+
     public function cryptos(): BelongsToMany {
         return $this->belongsToMany(Crypto::class, 'cryptoBalance')->withPivot('balance');
     }

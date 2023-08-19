@@ -14,7 +14,7 @@ class CryptoController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['index', 'show']]);
+        $this->middleware('auth:sanctum', ['except' => ['index', 'show']]);
     }
 
     /**
@@ -49,6 +49,7 @@ class CryptoController extends Controller
      */
     public function store(StoreCryptoRequest $request)
     {
+        abort_unless($request->user()->is_admin(), 403, 'Access denied');
         $validated = $request->safe()->except(['photo']);
         $file = $request->file('photo');
 
@@ -101,6 +102,7 @@ class CryptoController extends Controller
      */
     public function update(UpdateCryptoRequest $request, string $crypto)
     {
+        abort_unless($request->user()->is_admin(), 403, 'Access denied');
         $validated = $request->validated();
         $updates = [];
         foreach ($validated as $key => $value) {
@@ -119,8 +121,9 @@ class CryptoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $crypto)
+    public function destroy(Request $request,string $crypto)
     {
+        abort_unless($request->user()->is_admin(), 403, 'Access denied');
         $insert = DB::delete("DELETE from cryptos where slug = ?", [
             $crypto,
         ]);
@@ -136,6 +139,7 @@ class CryptoController extends Controller
      */
     public function photo(PhotoCryptoRequest $request, string $crypto)
     {
+        abort_unless($request->user()->is_admin(), 403, 'Access denied');
         $cryptos = DB::select("SELECT `slug`,`name`,`logo` from cryptos where slug = ?", [
             $crypto,
         ]);

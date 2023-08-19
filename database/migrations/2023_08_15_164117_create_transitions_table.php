@@ -27,7 +27,7 @@ return new class extends Migration
             $table->id();
             $table->boolean('in_out');
             $table->decimal('amount', 27, 18, true);
-            $table->string('ct_token');
+            $table->string('ct_token')->nullable();
             $table->enum('state', [
                 'waiting',
                 'failed',

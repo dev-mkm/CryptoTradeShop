@@ -13,7 +13,7 @@ class PriceController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth', ['except' => ['index', 'show']]);
+        $this->middleware('auth:sanctum', ['except' => ['index', 'show']]);
     }
 
     /**
@@ -67,6 +67,7 @@ class PriceController extends Controller
      */
     public function store(StoreCryptoPriceRequest $request, string $crypto)
     {
+        abort_unless($request->user()->is_admin(), 403, 'Access denied');
         $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = ?", [
             $crypto,
         ]);
