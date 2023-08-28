@@ -11,7 +11,7 @@ class StoreCryptoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,6 @@ class StoreCryptoRequest extends FormRequest
         return [
             'slug' => "required|string",
             'name' => "required|string",
-            'price' => "required|integer",
             'photo' => "required|image|mimes:jpg,png,jpeg,gif,svg",
         ];
     }

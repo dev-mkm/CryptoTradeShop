@@ -22,17 +22,49 @@ class OfferController extends Controller
             $sort1 = '>=';
             $sort2 = 'desc';
             if(isset($offer_id)) {
-
+                $offer = DB::select('SELECT `amount` from `offers` where `id` = ?', [$offer_id]);
+                abort_unless(count($offer) > 0, 404, 'Order not found');
+                $id = DB::table('crypto_transactions')->insertGetId(
+                    ['in_out' => false, 'amount' => $amount - $offer[0]->amount, 'state' => 'success',
+                    'user_id' => $user, 'crypto_id' => $crypto]
+                );
+                $insert = DB::insert("INSERT into cryptoBalance (`balance`, `user_id`, `crypto_id`, `c_t_id`) values (`balance` - ?, ?, ?, ?)", [
+                    $amount - $offer[0]->amount,
+                    $user,
+                    $crypto,
+                    $id
+                ]);
+                abort_unless($insert > 0, 401, 'Insufficient funds');
             } else {
-
+                $id = DB::table('crypto_transactions')->insertGetId(
+                    ['in_out' => false, 'amount' => $amount, 'state' => 'success',
+                    'user_id' => $user, 'crypto_id' => $crypto]
+                );
+                $insert = DB::insert("INSERT into cryptoBalance (`balance`, `user_id`, `crypto_id`, `c_t_id`) values (?, ?, ?, ?)", [
+                    $amount,
+                    $user,
+                    $crypto,
+                    $id
+                ]);
+                abort_unless($insert > 0, 401, 'Insufficient funds');
             }
         } else {
             $sort1 = '<=';
             $sort2 = 'asc';
             if(isset($offer_id)) {
-
+                $offer = DB::select('SELECT `amount` from `offers` where `id` = ?', [$offer_id]);
+                abort_unless(count($offer) > 0, 404, 'Order not found');
+                $insert = DB::update("UPDATE `users` set `balance` = `balance` - ? where `id` = ?", [
+                    ($amount - $offer[0]->amount) * $price,
+                    $user
+                ]);
+                abort_unless($insert > 0, 401, 'Insufficient funds');
             } else {
-                
+                $insert = DB::update("UPDATE `users` set `balance` = `balance` - ? where `id` = ?", [
+                    $amount * $price,
+                    $user
+                ]);
+                abort_unless($insert > 0, 401, 'Insufficient funds');
             }
         }
         $traded = 0;
@@ -62,36 +94,36 @@ class OfferController extends Controller
                 $count = count($offer);
                 if ($count > 0) {
                     $offer = $offer[0];
-                    $changeofferamount = $offer['amount'];
+                    $changeofferamount = $offer->amount;
                     if ($changeofferamount > $amount) {
                         $changeofferamount = $amount;
                     }
                     $id = DB::table('crypto_transactions')->insertGetId(
                         ['in_out' => true, 'amount' => $changeofferamount, 'state' => 'success',
-                        'user_id' => $offer['user_id'], 'crypto_id' => $crypto]
+                        'user_id' => $offer->user_id, 'crypto_id' => $crypto]
                     );
                     $insert = DB::insert("INSERT into cryptoBalance (`balance`, `user_id`, `crypto_id`, `c_t_id`) values (?, ?, ?, ?)", [
-                        $changeofferamount + $offer['balance'],
-                        $offer['user_id'],
+                        $changeofferamount + $offer->balance,
+                        $offer->user_id,
                         $crypto,
                         $id
                     ]);
                     if ($insert) {
                         DB::update("UPDATE `users` set `balance` = ? where `id` = ?", [
-                            $offer['user_balance'] + ($changeofferamount * ($price - round(($price + $offer['price']) / 2))),
-                            $offer['user_id']
+                            $offer->user_balance + ($changeofferamount * ($price - round(($price + $offer->price) / 2))),
+                            $offer->user_id
                         ]);
                         if ($changeofferamount > $amount) {
                             DB::update("UPDATE `offers` set `amount` = ? where `id` = ?", [
-                                $offer['amount'] - $changeofferamount,
-                                $offer['id']
+                                $offer->amount - $changeofferamount,
+                                $offer->id
                             ]);
                         } else {
                             DB::delete("DELETE from `offers` where `id` = ?", [
-                                $offer['id']
+                                $offer->id
                             ]);
                         }
-                        $traded += $changeofferamount * round(($price + $offer['price']) / 2);
+                        $traded += $changeofferamount * round(($price + $offer->price) / 2);
                         $amount -= $changeofferamount;
                     }
                 }
@@ -108,27 +140,27 @@ class OfferController extends Controller
                 $count = count($offer);
                 if ($count > 0) {
                     $offer = $offer[0];
-                    $changeofferamount = $offer['amount'];
+                    $changeofferamount = $offer->amount;
                     if ($changeofferamount > $amount) {
                         $changeofferamount = $amount;
                     }
                     $insert = DB::update("UPDATE `users` set `balance` = ? where `id` = ?", [
-                        $offer['balance'] + ($changeofferamount * round(($price + $offer['price']) / 2)),
-                        $offer['user_id']
+                        $offer->balance + ($changeofferamount * round(($price + $offer->price) / 2)),
+                        $offer->user_id
                     ]);
                     if ($insert > 0) {
                         if ($changeofferamount > $amount) {
                             DB::update("UPDATE `offers` set `amount` = ? where `id` = ?", [
-                                $offer['amount'] - $changeofferamount,
-                                $offer['id']
+                                $offer->amount - $changeofferamount,
+                                $offer->id
                             ]);
                         } else {
                             DB::delete("DELETE from `offers` where `id` = ?", [
-                                $offer['id']
+                                $offer->id
                             ]);
                         }
                         $traded += $changeofferamount;
-                        $back += $changeofferamount * ($price - round(($price + $offer['price']) / 2));
+                        $back += $changeofferamount * ($price - round(($price + $offer->price) / 2));
                         $amount -= $changeofferamount;
                     }
                 }
@@ -175,7 +207,7 @@ class OfferController extends Controller
                 $user,
                 $crypto,
             ]);
-            $balance = isset($balance[0]['balance']) ? $balance[0]['balance'] : 0;
+            $balance = isset($balance[0]->balance) ? $balance[0]->balance : 0;
             $id = DB::table('crypto_transactions')->insertGetId(
                 ['in_out' => true, 'amount' => $traded, 'state' => 'success',
                 'user_id' => $user, 'crypto_id' => $crypto]
@@ -244,23 +276,41 @@ class OfferController extends Controller
         ]);
     }
 
+    public function user(Request $request)
+    {
+        $cryptos = DB::select('SELECT offer.id ,offer.price, offer.amount, offer.selling,
+        offer.user_id, user.name as user_name, cryptos.name as crypto_name , cryptos.slug as crypto_id
+        FROM `offers` as offer
+        LEFT JOIN `users` as user
+        ON offer.user_id = user.id
+        LEFT JOIN cryptos
+        ON offer.crypto_id = cryptos.id
+        WHERE offer.user_id = ?', [
+            $request->user()->id,
+        ]);
+        return response()->json([
+            'status' => 200,
+            'result' => $cryptos
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
     public function store(string $crypto, StoreOfferRequest $request)
     {
         $user_id = $request->user()->id;
-        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = '?'", [
+        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = ?", [
             $crypto,
         ]);
         abort_unless(count($cryptos) > 0, 404, 'Crypto not found');
         $offer = DB::select("SELECT `id` from `offers` where `crypto_id` = ? and `user_id` = ?", [
-            $cryptos[0]['id'],
+            $cryptos[0]->id,
             $user_id
         ]);
         abort_if(count($offer) > 0, 401, 'User already has an offer');
         $validated = $request->validated();
-        return $this->TradeOffer($cryptos[0]['id'], $user_id, $validated['price'], $validated['amount'], $validated['selling']);
+        return $this->TradeOffer($cryptos[0]->id, $user_id, $validated['price'], $validated['amount'], $validated['selling']);
     }
 
     /**
@@ -290,19 +340,19 @@ class OfferController extends Controller
      */
     public function update(UpdateOfferRequest $request, string $crypto, string $offer)
     {
-        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = '?'", [
+        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = ?", [
             $crypto,
         ]);
         abort_unless(count($cryptos) > 0, 404, 'Crypto not found');
-        $offers = DB::select("SELECT `id` from `offers` where `crypto_id` = ? and `id` = ?", [
-            $cryptos[0]['id'],
+        $offers = DB::select("SELECT * from `offers` where `crypto_id` = ? and `id` = ?", [
+            $cryptos[0]->id,
             $offer
         ]);
         abort_unless(count($offers) > 0, 401, 'Offer not found');
         $off = $offers[0];
-        abort_unless($request->user()->id == $off['user_id'], 403, 'Access denied');
+        abort_unless($request->user()->id == $off->user_id, 403, 'Access denied');
         $validated = $request->validated();
-        return $this->TradeOffer($cryptos[0]['id'], $off['user_id'], $validated['price'], $validated['amount'], $off['selling'], $off['id']);
+        return $this->TradeOffer($cryptos[0]->id, $off->user_id, $validated['price'], $validated['amount'], $off->selling, $off->id);
     }
 
     /**
@@ -310,17 +360,17 @@ class OfferController extends Controller
      */
     public function destroy(Request $request ,string $crypto, string $offer)
     {
-        $cryptos = DB::select("SELECT `slug`,`id` from cryptos where slug = '?'", [
+        $cryptos = DB::select("SELECT * from cryptos where slug = ?", [
             $crypto,
         ]);
         abort_unless(count($cryptos) > 0, 404, 'Crypto not found');
-        $offers = DB::select("SELECT `id` from `offers` where `crypto_id` = ? and `id` = ?", [
-            $cryptos[0]['id'],
+        $offers = DB::select("SELECT `id`,`user_id` from `offers` where `crypto_id` = ? and `id` = ?", [
+            $cryptos[0]->id,
             $offer
         ]);
         abort_unless(count($offers) > 0, 401, 'Offer not found');
         $off = $offers[0];
-        abort_unless($request->user()->id == $off['user_id'], 403, 'Access denied');
+        abort_unless($request->user()->id == $off->user_id, 403, 'Access denied');
         $insert = DB::delete("DELETE from offers where id = ?", [
             $offer,
         ]);

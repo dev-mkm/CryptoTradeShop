@@ -3,15 +3,16 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
-class UpdateCryptoTransactionRequest extends FormRequest
+class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,9 @@ class UpdateCryptoTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'email' => "required|email|unique:users,email",
+            'name' => "required|string",
+            'password' => ['required', Password::min(8)->mixedCase()->numbers()],
         ];
     }
 }

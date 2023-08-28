@@ -77,7 +77,7 @@ class PriceController extends Controller
         $insert = DB::insert("INSERT into `crypto_prices` (`time`, `price`, `crypto_id`) values (?, ?, ?)", [
             now(),
             $validated['price'],
-            $cryptos[0]['id'],
+            $cryptos[0]->id,
         ]);
         abort_unless($insert, 500, 'Server Error');
         return response()->json([

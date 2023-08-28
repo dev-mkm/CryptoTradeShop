@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
-class UpdateTransactionRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +23,9 @@ class UpdateTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'email' => "nullable|email|unique:users,email",
+            'name' => "nullable|string",
+            'password' => ['nullable', Password::min(8)->mixedCase()->numbers()],
         ];
     }
 }

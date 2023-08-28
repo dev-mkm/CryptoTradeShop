@@ -14,13 +14,14 @@ class TradeController extends Controller
      */
     public function index(Request $request)
     {
-        $where = "AND offer.user_id = '".$request->user()->id."'";
+        $where = "AND (userTrade2.user_id = '".$request->user()->id."' OR userTrade1.user_id = '".$request->user()->id."')";
         if ($request->has('crypto')) {
             $where .= " AND cryptos.slug = '".$request->input('crypto')."'";
         }
-        $cryptos = DB::select('SELECT trade.id ,trade.price,
+        $cryptos = DB::select('SELECT trade.id ,trade.price, trade.amount,
         cryptos.name as crypto_name , cryptos.slug as crypto_id,
-        userTrade1.user_id as `buyer_id`, userTrade2.user_id as `seller_id`
+        userTrade1.user_id as `buyer_id`, userTrade2.user_id as `seller_id`,
+        CASE WHEN userTrade1.user_id = '.$request->user()->id.' THEN 1 ELSE 0 END AS `is_buyer`
         FROM `trades` as trade
         LEFT JOIN `userTrades` as userTrade1
         ON userTrade1.trade_id = trade.id
@@ -57,7 +58,7 @@ class TradeController extends Controller
             $trade,
         ]);
         abort_unless($cryptos > 0, 404, 'Trade not found');
-        abort_unless($request->user()->id == $cryptos[0]['seller_id'] || $request->user()->id == $cryptos[0]['buyer_id'] || $request->user()->is_admin(), 403, 'Access denied');
+        abort_unless($request->user()->id == $cryptos[0]->seller_id || $request->user()->id == $cryptos[0]->buyer_id || $request->user()->is_admin(), 403, 'Access denied');
         return response()->json([
             'status' => 200,
             'result' => $cryptos[0]

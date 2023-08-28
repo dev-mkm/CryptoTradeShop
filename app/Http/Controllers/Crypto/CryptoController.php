@@ -72,7 +72,7 @@ class CryptoController extends Controller
      */
     public function show(string $crypto)
     {
-        $cryptos = DB::select("SELECT cryptos.slug,cryptos.name,cryptos.logo,crypto_prices.price, o.offer from cryptos
+        $cryptos = DB::select("SELECT cryptos.id,cryptos.slug,cryptos.name,cryptos.logo,crypto_prices.price, o.offer from cryptos
         left join (
             SELECT crypto_id, MAX(`time`) as MaxTime
             FROM crypto_prices
@@ -145,10 +145,10 @@ class CryptoController extends Controller
         ]);
         abort_unless($cryptos > 0, 404, 'Crypto not found');
         $cr = $cryptos[0];
-        Storage::delete($cr['photo']);
+        Storage::delete($cr->logo);
         $file = $request->file('photo');
         $photo = $file->storePubliclyAs(
-            'public/crypto', $cr['slug'].'.'.$file->extension()
+            'public/crypto', $cr->slug.'.'.$file->extension()
         );
         $insert = DB::update("UPDATE cryptos set `logo` = ? where slug = ?", [
             $photo,

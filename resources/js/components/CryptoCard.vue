@@ -14,7 +14,7 @@ defineProps(['name', 'slug', 'logo', 'price', 'offer'])
                     <p class="text-right ml-2" v-if="price">{{ new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: 'USD',
-                    }).format(price) }}$</p>
+                    }).format(price) }}</p>
                     <p class="text-right ml-2" v-else>--</p>
                 </div>
                 <div class="text-h6 text-left px-2 pt-3 d-flex flex-wrap justify-space-between">

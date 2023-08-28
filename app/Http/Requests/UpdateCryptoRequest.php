@@ -11,7 +11,7 @@ class UpdateCryptoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,6 @@ class UpdateCryptoRequest extends FormRequest
         return [
             'slug' => "nullable|string",
             'name' => "nullable|string",
-            'price' => "nullable|integer",
         ];
     }
 }

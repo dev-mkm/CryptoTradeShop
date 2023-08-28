@@ -18,6 +18,20 @@ return new class extends Migration
             $table->string('logo')->nullable();
             $table->timestamps();
         });
+        Schema::create('crypto_transactions', function (Blueprint $table) {
+            $table->id();
+            $table->boolean('in_out');
+            $table->decimal('amount', 27, 18, true);
+            $table->string('ct_token')->nullable();
+            $table->enum('state', [
+                'waiting',
+                'failed',
+                'success'
+            ])->default('waiting');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
+            $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
+            $table->timestamp('date')->useCurrent();
+        });
         Schema::create('cryptoBalance', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate();
             $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
@@ -26,7 +40,7 @@ return new class extends Migration
             $table->primary(['user_id', 'crypto_id', 'c_t_id']);
         });
         Schema::create('crypto_prices', function (Blueprint $table) {
-            $table->timestamp('time')->default('CURRENT_TIMESTAMP');
+            $table->timestamp('time')->useCurrent();
             $table->foreignId('crypto_id')->constrained('cryptos')->cascadeOnUpdate();
             $table->decimal('price', 10, 2, true);
             $table->primary(['time', 'crypto_id']);
@@ -40,6 +54,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('crypto_prices');
         Schema::dropIfExists('cryptoBalance');
+        Schema::dropIfExists('crypto_transactions');
         Schema::dropIfExists('cryptos');
     }
 };
